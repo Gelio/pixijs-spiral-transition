@@ -31,7 +31,6 @@ export default class CanvasController {
     this.stage.removeChild(this.slideshowController.currentSprite);
     this.stage.addChild(this.slideshowController.nextSprite);
     this.render();
-    console.log('moving to next sprite');
     this.slideshowController.moveToNextImage();
   }
 }

@@ -2,37 +2,51 @@ import SpriteLoader from './sprite-loader';
 import EventEmitter from './event-emitter';
 
 export default class SlideshowController extends EventEmitter {
-  currentSprite: PIXI.Sprite;
-  nextSprite: PIXI.Sprite;
   private currentImageNumber = 0;
+  private sprites: PIXI.Sprite[] = [];
 
   constructor(
     private spriteLoader: SpriteLoader,
-    private imagesList: string[],
+    private imageUrls: string[],
   ) {
     super();
     this.init();
   }
 
   async moveToNextImage() {
-    this.currentSprite = this.nextSprite;
     this.currentImageNumber = this.nextImageNumber;
-    this.nextSprite = await this.spriteLoader.loadAndScaleSprite(this.imagesList[this.nextImageNumber]);
+    await this.loadImageIfNotLoaded(this.nextImageNumber);
     this.dispatchEvent(new Event('next-sprite-loaded'));
   }
 
   private async init() {
-    const currentSpritePromise = this.spriteLoader.loadAndScaleSprite(this.imagesList[this.currentImageNumber]);
-    const nextSpritePromise = this.spriteLoader.loadAndScaleSprite(this.imagesList[this.nextImageNumber]);
+    const currentSpritePromise = this.loadImageIfNotLoaded(this.currentImageNumber);
+    const nextSpritePromise = this.loadImageIfNotLoaded(this.nextImageNumber);
 
-
-    this.currentSprite = await currentSpritePromise;
+    await currentSpritePromise;
     this.dispatchEvent(new Event('current-sprite-loaded'));
-    this.nextSprite = await nextSpritePromise;
+    await nextSpritePromise;
     this.dispatchEvent(new Event('next-sprite-loaded'));
   }
 
+  private async loadImageIfNotLoaded(index: number) {
+    if (index < this.sprites.length) {
+      return this.sprites[index];
+    }
+
+    this.sprites[index] = await this.spriteLoader.loadAndScaleSprite(this.imageUrls[index]);
+    return this.sprites[index];
+  }
+
   private get nextImageNumber() {
-    return (this.currentImageNumber + 1) % this.imagesList.length;
+    return (this.currentImageNumber + 1) % this.imageUrls.length;
+  }
+
+  get currentSprite() {
+    return this.sprites[this.currentImageNumber];
+  }
+
+  get nextSprite() {
+    return this.sprites[this.nextImageNumber];
   }
 }
