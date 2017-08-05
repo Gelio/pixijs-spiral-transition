@@ -1,0 +1,9 @@
+{
+  "include": ["./src/**/*.ts"],
+  "compilerOptions": {
+    "target": "es2015",
+    "sourceMap": true,
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"]
+  }
+}
